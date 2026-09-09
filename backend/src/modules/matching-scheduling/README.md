@@ -182,6 +182,30 @@ curl -X PATCH http://localhost:5000/api/schedule/sessions/<SESSION_ID>/cancel \
   }'
 ```
 
+### 8. Submit a Post-Call Reflection
+```bash
+curl -X POST http://localhost:5000/api/schedule/sessions/<SESSION_ID>/reflection \
+  -H "Content-Type: application/json" \
+  -H "x-user-id: 65f1a2b3c4d5e6f7a8b9c001" \
+  -d '{
+    "learnings": "Discussed React state management patterns and differences in university curricula.",
+    "rating": 5,
+    "culturalExchangeNotes": "Learned about student life and hackathon culture in Singapore."
+  }'
+```
+
+### 9. Get Reflections for a Session
+```bash
+curl -X GET http://localhost:5000/api/schedule/sessions/<SESSION_ID>/reflection \
+  -H "x-user-id: 65f1a2b3c4d5e6f7a8b9c001"
+```
+
+### 10. Get All Reflections by Current User
+```bash
+curl -X GET http://localhost:5000/api/schedule/reflections/my \
+  -H "x-user-id: 65f1a2b3c4d5e6f7a8b9c001"
+```
+
 ---
 
 ## 🧪 Running the Tests

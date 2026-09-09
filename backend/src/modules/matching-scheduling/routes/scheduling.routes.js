@@ -6,6 +6,9 @@ import {
   bookSessionHandler,
   getMySessionsHandler,
   cancelSessionHandler,
+  createReflectionHandler,
+  getSessionReflectionsHandler,
+  getMyReflectionsHandler,
 } from '../controllers/matching-scheduling.controller.js';
 
 const router = Router();
@@ -18,5 +21,10 @@ router.get('/availability/:userId', requireAuth, getAvailabilityHandler);
 router.post('/book', requireAuth, bookSessionHandler);
 router.get('/sessions/my', requireAuth, getMySessionsHandler);
 router.patch('/sessions/:sessionId/cancel', requireAuth, cancelSessionHandler);
+
+// Post-Call Reflection endpoints
+router.post('/sessions/:sessionId/reflection', requireAuth, createReflectionHandler);
+router.get('/sessions/:sessionId/reflection', requireAuth, getSessionReflectionsHandler);
+router.get('/reflections/my', requireAuth, getMyReflectionsHandler);
 
 export default router;

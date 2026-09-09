@@ -118,4 +118,69 @@ test('Matching & Scheduling Module - Unit & Integration Test Suite', async (t) =
     assert.ok(Session.schema.path('meetingLink'));
     assert.ok(Session.schema.path('status'));
   });
+
+  await t.test('8. Reflection Schema & Compound Uniqueness Definition', async () => {
+    const { default: Reflection } = await import('../models/Reflection.js');
+    assert.ok(Reflection.schema.path('sessionId'));
+    assert.ok(Reflection.schema.path('userId'));
+    assert.ok(Reflection.schema.path('learnings'));
+    assert.ok(Reflection.schema.path('rating'));
+    assert.ok(Reflection.schema.path('culturalExchangeNotes'));
+
+    // Verify compound unique index { sessionId: 1, userId: 1 }
+    const indexes = Reflection.schema.indexes();
+    const compoundUniqueIndex = indexes.find(
+      ([fields, options]) =>
+        fields.sessionId === 1 && fields.userId === 1 && options?.unique === true
+    );
+    assert.ok(compoundUniqueIndex, 'Compound unique index { sessionId: 1, userId: 1 } must exist');
+  });
+
+  await t.test('9. Reflection Model Validation & Duplicate Prevention', async () => {
+    const { default: Reflection } = await import('../models/Reflection.js');
+
+    // Rating boundaries validation
+    const validReflection = new Reflection({
+      sessionId: '65f1a2b3c4d5e6f7a8b9c001',
+      userId: '65f1a2b3c4d5e6f7a8b9c002',
+      learnings: 'Great conversation on React hooks and state management.',
+      rating: 5,
+    });
+    let validErr = null;
+    try {
+      await validReflection.validate();
+    } catch (e) {
+      validErr = e;
+    }
+    assert.equal(validErr, null);
+
+    // Missing learnings validation
+    const invalidReflection = new Reflection({
+      sessionId: '65f1a2b3c4d5e6f7a8b9c001',
+      userId: '65f1a2b3c4d5e6f7a8b9c002',
+      rating: 4,
+    });
+    let missingLearningsErr = null;
+    try {
+      await invalidReflection.validate();
+    } catch (e) {
+      missingLearningsErr = e;
+    }
+    assert.ok(missingLearningsErr?.errors?.learnings);
+
+    // Out of bounds rating validation
+    const invalidRatingReflection = new Reflection({
+      sessionId: '65f1a2b3c4d5e6f7a8b9c001',
+      userId: '65f1a2b3c4d5e6f7a8b9c002',
+      learnings: 'Learned something',
+      rating: 10,
+    });
+    let invalidRatingErr = null;
+    try {
+      await invalidRatingReflection.validate();
+    } catch (e) {
+      invalidRatingErr = e;
+    }
+    assert.ok(invalidRatingErr?.errors?.rating);
+  });
 });

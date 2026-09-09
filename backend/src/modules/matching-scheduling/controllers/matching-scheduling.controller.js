@@ -9,6 +9,9 @@ import {
   getMySessions,
   cancelSession,
   BookingConflictError,
+  createReflection,
+  getSessionReflections,
+  getMyReflections,
 } from '../services/scheduling.service.js';
 
 /**
@@ -216,3 +219,97 @@ export async function cancelSessionHandler(req, res) {
     });
   }
 }
+
+/**
+ * POST /api/schedule/sessions/:sessionId/reflection
+ * Submits a post-call reflection for a completed or scheduled session.
+ */
+export async function createReflectionHandler(req, res) {
+  try {
+    const userId = req.userId;
+    const { sessionId } = req.params;
+    const { learnings, rating, culturalExchangeNotes, safetyReport } = req.body;
+
+    const reflection = await createReflection({
+      sessionId,
+      userId,
+      learnings,
+      rating,
+      culturalExchangeNotes,
+      safetyReport,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Reflection submitted successfully',
+      data: reflection,
+    });
+  } catch (error) {
+    if (error.statusCode === 409 || error.code === 11000 || error.message.includes('already submitted')) {
+      return res.status(409).json({
+        success: false,
+        error: 'Conflict',
+        message: error.message || 'You have already submitted a reflection for this session',
+      });
+    }
+
+    if (error.message.includes('Unauthorized') || error.message.includes('not a participant')) {
+      return res.status(403).json({
+        success: false,
+        error: 'Forbidden',
+        message: error.message,
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      error: error.message,
+    });
+  }
+}
+
+/**
+ * GET /api/schedule/sessions/:sessionId/reflection
+ * Retrieves all reflections submitted for a specific session.
+ */
+export async function getSessionReflectionsHandler(req, res) {
+  try {
+    const { sessionId } = req.params;
+    const reflections = await getSessionReflections(sessionId);
+
+    return res.status(200).json({
+      success: true,
+      sessionId,
+      count: reflections.length,
+      data: reflections,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      error: error.message,
+    });
+  }
+}
+
+/**
+ * GET /api/schedule/reflections/my
+ * Retrieves all reflections submitted by the logged-in student.
+ */
+export async function getMyReflectionsHandler(req, res) {
+  try {
+    const userId = req.userId;
+    const reflections = await getMyReflections(userId);
+
+    return res.status(200).json({
+      success: true,
+      count: reflections.length,
+      data: reflections,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      error: error.message,
+    });
+  }
+}
+

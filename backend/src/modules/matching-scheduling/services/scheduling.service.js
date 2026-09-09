@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import Availability from '../models/Availability.js';
 import Session from '../models/Session.js';
 import MatchRequest from '../models/MatchRequest.js';
+import Reflection from '../models/Reflection.js';
 
 /**
  * Scheduling Service
@@ -297,3 +298,110 @@ export async function cancelSession(sessionId, userId, reason = 'Cancelled by pa
 
   return session;
 }
+
+/**
+ * Submits a post-call reflection for a completed or scheduled session.
+ * Automatically marks scheduled sessions as completed upon reflection.
+ *
+ * @param {object} params
+ * @param {string|mongoose.Types.ObjectId} params.sessionId
+ * @param {string|mongoose.Types.ObjectId} params.userId
+ * @param {string} params.learnings
+ * @param {number} [params.rating=5]
+ * @param {string} [params.culturalExchangeNotes='']
+ * @param {object} [params.safetyReport]
+ * @returns {Promise<Reflection>}
+ */
+export async function createReflection({
+  sessionId,
+  userId,
+  learnings,
+  rating = 5,
+  culturalExchangeNotes = '',
+  safetyReport,
+}) {
+  const sId = new mongoose.Types.ObjectId(sessionId);
+  const uid = new mongoose.Types.ObjectId(userId);
+
+  if (!learnings || learnings.trim().length === 0) {
+    throw new Error('Key learnings or takeaways are required for reflection');
+  }
+
+  // 1. Verify session exists and is not cancelled
+  const session = await Session.findById(sId);
+  if (!session) {
+    throw new Error('Session not found');
+  }
+
+  if (session.status === 'cancelled') {
+    throw new Error('Cannot submit reflection for a cancelled session');
+  }
+
+  // 2. Verify user was actually one of the session participants
+  const isParticipant = session.participants.some(
+    (p) => p.toString() === uid.toString()
+  );
+  if (!isParticipant) {
+    throw new Error('Unauthorized: You are not a participant in this session');
+  }
+
+  // 3. Prevent duplicate reflections by same user for same session
+  const existingReflection = await Reflection.findOne({
+    sessionId: sId,
+    userId: uid,
+  });
+  if (existingReflection) {
+    const duplicateErr = new Error('You have already submitted a reflection for this session');
+    duplicateErr.statusCode = 409;
+    throw duplicateErr;
+  }
+
+  // 4. Create and save the reflection
+  const reflection = await Reflection.create({
+    sessionId: sId,
+    userId: uid,
+    learnings: learnings.trim(),
+    rating: Number(rating) || 5,
+    culturalExchangeNotes: culturalExchangeNotes ? culturalExchangeNotes.trim() : '',
+    safetyReport: safetyReport || undefined,
+  });
+
+  // 5. If session was scheduled, mark it completed
+  if (session.status === 'scheduled') {
+    session.status = 'completed';
+    await session.save();
+  }
+
+  return await Reflection.findById(reflection._id)
+    .populate('userId', 'name email country timezone')
+    .populate('sessionId', 'topic scheduledStart scheduledEnd');
+}
+
+/**
+ * Retrieves all reflections submitted for a specific session.
+ *
+ * @param {string|mongoose.Types.ObjectId} sessionId
+ * @returns {Promise<Reflection[]>}
+ */
+export async function getSessionReflections(sessionId) {
+  const sId = new mongoose.Types.ObjectId(sessionId);
+  return await Reflection.find({ sessionId: sId })
+    .populate('userId', 'name email country timezone')
+    .sort({ createdAt: -1 })
+    .lean();
+}
+
+/**
+ * Retrieves all reflections submitted by the current user.
+ *
+ * @param {string|mongoose.Types.ObjectId} userId
+ * @returns {Promise<Reflection[]>}
+ */
+export async function getMyReflections(userId) {
+  const uid = new mongoose.Types.ObjectId(userId);
+  return await Reflection.find({ userId: uid })
+    .populate('sessionId', 'topic scheduledStart scheduledEnd meetingLink')
+    .sort({ createdAt: -1 })
+    .lean();
+}
+
