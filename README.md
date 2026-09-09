@@ -4,17 +4,17 @@ Global Student Connect is a collaborative platform built on the MERN stack (Mong
 
 ---
 
-## 👥 Team Ownership Matrix
+## 👥 Team Roles & Ownership Matrix
 
-To keep development simple and avoid Git merge conflicts across the 5-person team, responsibilities are organized by layer and feature domain:
+This team matrix aligns directly with our official division of labor to ensure seamless collaboration and prevent Git merge conflicts:
 
-| Member | Focus Area | Owned Paths | Core Responsibilities |
+| Member | Responsibility | Main Work | Primary Code Paths / Files |
 | :--- | :--- | :--- | :--- |
-| **Member 1 (Tech Lead)** | Auth & User Core | `backend/controllers/auth*`, `backend/models/User.js`, `frontend/src/components/*Auth*` | User authentication, JWT sessions, user profiles & login/signup UI |
-| **Member 2** | Video & Rooms | `backend/controllers/session*`, `backend/models/Session.js`, `frontend/src/pages/Video*` | WebRTC / video calling, virtual rooms & session scheduling |
-| **Member 3** | Matching & Discovery | `backend/controllers/match*`, `backend/models/Match.js`, `frontend/src/components/*Match*` | Matchmaking algorithm, interest filtering & peer discovery cards |
-| **Member 4** | Reflections & Safety | `backend/controllers/reflection*`, `backend/models/Reflection.js`, `frontend/src/pages/Reflection*` | Post-session reflections, peer feedback forms & safety reports |
-| **Member 5** | Core Infrastructure | `backend/config/`, `backend/middleware/`, `backend/routes/`, `frontend/src/pages/Dashboard*` | Database connection, auth/error middleware, routing & dashboard |
+| **1. Frontend** | **Student UI** | Login, profile, dashboard, matching screens | `frontend/src/pages/` (`Login.jsx`, `Profile.jsx`, `Dashboard.jsx`, `Matching.jsx`), `frontend/src/components/` (Auth & Profile UI) |
+| **2. Frontend** | **Video/Interaction UI** | Video-call page, chat, topic/question interface | `frontend/src/pages/` (`VideoCall.jsx`, `Chat.jsx`), `frontend/src/components/` (Video player, Chat box, Topic prompt widgets) |
+| **3. Backend** | **Authentication & Profiles** | APIs, login/signup, student profiles | `backend/models/User.js`, `backend/controllers/auth*`, `backend/routes/auth*`, `backend/middleware/auth*` |
+| **4. Backend** | **Matching & Scheduling** | Matching algorithm, database, meeting scheduling | `backend/models/Match.js`, `backend/models/Session.js`, `backend/models/Reflection.js`, `backend/controllers/match*`, `backend/controllers/session*` |
+| **5. Integration/AI** | **AI + DevOps** | AI-assisted matching/topic suggestions, API integration, deployment, testing | `backend/controllers/ai*`, `backend/routes/ai*`, Docker/CI deployment configs, cross-service integration & automated tests |
 
 ---
 
@@ -54,7 +54,7 @@ Individual service commands:
 
 ---
 
-## 📁 Clean Repository Structure
+## 📁 Repository Structure
 
 ```
 Global-Student-Connect/
@@ -69,9 +69,9 @@ Global-Student-Connect/
 │   ├── index.html
 │   └── src/
 │       ├── main.jsx           # Vite React client entry
-│       ├── App.jsx            # Starter client screen
-│       ├── components/        # Reusable UI widgets (cards, modals, forms)
-│       └── pages/             # Route-level views (Dashboard, VideoRoom, Reflection)
+│       ├── App.jsx            # Starter client dashboard with team matrix
+│       ├── components/        # [Members 1 & 2] Reusable UI widgets (cards, chat, video controls)
+│       └── pages/             # [Members 1 & 2] Route-level views (Login, Profile, Video, Matching)
 │
 └── backend/                   # Express + Mongoose (Port 5000)
     ├── package.json           # ES Module ("type": "module")
@@ -79,19 +79,19 @@ Global-Student-Connect/
     ├── server.js              # Express entry point
     ├── config/                # Database connection & env config
     │   └── db.js
-    ├── controllers/           # Route controller handlers
-    ├── middleware/            # Auth verification, error handling
-    ├── models/                # Mongoose database schemas
-    │   ├── User.js            # User profiles & preferences
-    │   ├── Match.js           # Match requests & compatibility
-    │   ├── Session.js         # Video rooms & scheduled times
-    │   ├── Reflection.js      # Feedback & safety reports
+    ├── controllers/           # [Members 3, 4, 5] Route controller handlers (auth, match, session, ai)
+    ├── middleware/            # [Members 3 & 5] Auth verification, error handling
+    ├── models/                # [Members 3 & 4] Mongoose database schemas
+    │   ├── User.js            # [Member 3] User profiles & credentials
+    │   ├── Match.js           # [Member 4] Match pairings & compatibility
+    │   ├── Session.js         # [Member 4] Meeting rooms & schedules
+    │   ├── Reflection.js      # [Member 4] Post-session feedback & reports
     │   └── index.js
-    └── routes/                # Express API route endpoints
+    └── routes/                # [Members 3, 4, 5] Express API routes (auth, match, session, ai)
 ```
 
 ---
 
 ## 🌿 Git Workflow Rules
-1. **Branching**: Branch off `main` using feature branches: `feature/<member>-<task-name>` (e.g., `feature/m1-auth-ui`, `feature/m2-video-call`).
+1. **Branching**: Branch off `main` using feature branches: `feature/<member>-<task-name>` (e.g., `feature/m1-student-login`, `feature/m2-video-call`, `feature/m3-auth-api`, `feature/m4-matching-algo`, `feature/m5-ai-topics`).
 2. **Pull Requests**: Pull the latest `main` before submitting a PR and request review from at least one teammate.
