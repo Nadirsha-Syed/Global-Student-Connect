@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import matchingRoutes from './src/modules/matching-scheduling/routes/matching.routes.js';
 import schedulingRoutes from './src/modules/matching-scheduling/routes/scheduling.routes.js';
+import authRoutes from './routes/authRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -29,6 +30,9 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Authentication & Student Profile Module Routes
+app.use('/api/auth', authRoutes);
 
 // Member 4: Matching & Scheduling Module Routes
 app.use('/api/match', matchingRoutes);
