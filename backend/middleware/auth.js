@@ -1,23 +1,31 @@
+import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+import User from '../models/User.js';
+
 /**
- * Authentication Middleware (Team Contract with Member 3)
+ * Authentication Middleware (Student Auth & Team Contract)
  * 
- * Extracts and sets `req.user = { id: userId, _id: userId }`.
- * Integrates seamlessly with Member 3's JWT implementation:
- * - Reads Bearer token from `Authorization` header.
- * - Supports `x-user-id` header for direct module-level testing and microservice requests.
+ * Extracts and verifies JWT token or developer headers, attaching:
+ * `req.user` and `req.userId`.
+ * 
+ * Supports:
+ * 1. Bearer JWT tokens via `Authorization` header (cryptographically verified).
+ * 2. `x-user-id` header for module-level integration tests.
+ * 3. Raw 24-character hex ObjectId tokens for direct testing.
+ * 4. Upstream pre-authenticated req.user objects.
  */
-export const requireAuth = (req, res, next) => {
-  // 1. If already set upstream by Member 3's auth pipeline
+export const requireAuth = async (req, res, next) => {
+  // 1. If already set upstream
   if (req.user && (req.user.id || req.user._id)) {
-    req.userId = req.user.id || req.user._id;
+    req.userId = (req.user.id || req.user._id).toString();
     return next();
   }
 
-  // 2. Check x-user-id header
+  // 2. Check x-user-id header (direct module-level testing contract)
   const headerUserId = req.headers['x-user-id'];
   if (headerUserId) {
     req.user = { id: headerUserId, _id: headerUserId };
-    req.userId = headerUserId;
+    req.userId = headerUserId.toString();
     return next();
   }
 
@@ -35,20 +43,41 @@ export const requireAuth = (req, res, next) => {
       return next();
     }
 
-    // If Member 3 uses JWT, decode basic payload if available
+    // Verify JWT token cryptographically
     try {
-      const parts = token.split('.');
-      if (parts.length === 3) {
-        const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
-        const resolvedId = payload.id || payload._id || payload.userId || payload.sub;
-        if (resolvedId) {
-          req.user = { id: resolvedId, _id: resolvedId, ...payload };
-          req.userId = resolvedId;
-          return next();
+      const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET || 'global_student_connect_jwt_secret_dev'
+      );
+      const resolvedId = decoded.id || decoded._id || decoded.userId || decoded.sub;
+
+      if (resolvedId) {
+        // If MongoDB is connected, load user model instance without password
+        if (mongoose.connection.readyState === 1) {
+          try {
+            const dbUser = await User.findById(resolvedId).select('-password');
+            if (dbUser) {
+              req.user = dbUser;
+              req.userId = dbUser._id.toString();
+              return next();
+            }
+          } catch {
+            // If lookup fails, fallback to decoded token payload
+          }
         }
+
+        req.user = { id: resolvedId, _id: resolvedId, ...decoded };
+        req.userId = resolvedId.toString();
+        return next();
       }
-    } catch {
-      // Fall through to 401 if unparseable
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized',
+        message: err.name === 'TokenExpiredError'
+          ? 'Token has expired. Please log in again.'
+          : 'Invalid authentication token.',
+      });
     }
   }
 
@@ -56,7 +85,7 @@ export const requireAuth = (req, res, next) => {
   const fallbackId = req.query?.userId || req.body?.userId;
   if (fallbackId && /^[0-9a-fA-F]{24}$/.test(fallbackId)) {
     req.user = { id: fallbackId, _id: fallbackId };
-    req.userId = fallbackId;
+    req.userId = fallbackId.toString();
     return next();
   }
 
@@ -67,4 +96,5 @@ export const requireAuth = (req, res, next) => {
   });
 };
 
+export const protect = requireAuth;
 export default requireAuth;

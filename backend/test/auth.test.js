@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
-import { signup, login, generateToken } from '../controllers/authController.js';
+import { signup, login, getProfile, updateProfile, generateToken } from '../controllers/authController.js';
 
 test('Authentication & Student Profile - Feature 1: Signup & User Model', async (t) => {
   await t.test('1. User Schema definition and paths', () => {
@@ -16,6 +16,9 @@ test('Authentication & Student Profile - Feature 1: Signup & User Model', async 
     assert.ok(User.schema.path('gradeLevel'), 'User schema must have gradeLevel');
     assert.ok(User.schema.path('interests'), 'User schema must have interests');
     assert.ok(User.schema.path('languages'), 'User schema must have languages');
+    assert.ok(User.schema.path('bio'), 'User schema must have bio');
+    assert.ok(User.schema.path('profilePicture'), 'User schema must have profilePicture');
+    assert.ok(User.schema.path('isProfileComplete'), 'User schema must have isProfileComplete');
   });
 
   await t.test('2. Password hashing & comparePassword method', async () => {
@@ -52,6 +55,28 @@ test('Authentication & Student Profile - Feature 1: Signup & User Model', async 
     const json = user.toJSON();
     assert.equal(json.password, undefined, 'toJSON must not expose password');
     assert.equal(json.__v, undefined, 'toJSON must not expose __v');
+  });
+
+  await t.test('3b. calculateProfileCompletion calculates dynamic score accurately', () => {
+    const user = new User({
+      name: 'Ruthvik Reddy',
+      country: 'India',
+      age: 19,
+      gradeLevel: 'College',
+      bio: 'I love technology and cultures',
+      interests: ['Technology', 'Music'],
+      languages: ['English', 'Hindi'],
+      profilePicture: 'https://example.com/avatar.jpg',
+    });
+
+    const completionScore = user.calculateProfileCompletion();
+    assert.equal(completionScore, 100, 'Full profile should have 100% completion');
+
+    const partialUser = new User({
+      name: 'Ruthvik Reddy',
+      country: 'India',
+    });
+    assert.equal(partialUser.calculateProfileCompletion(), 30, 'Partial profile should have 30% completion');
   });
 
   await t.test('4. generateToken produces valid JWT token', () => {
@@ -368,4 +393,480 @@ test('Authentication & Student Profile - Feature 2: Login API', async (t) => {
     }
   });
 });
+
+test('Authentication & Student Profile - Feature 3: Auth Middleware', async (t) => {
+  const { requireAuth } = await import('../middleware/auth.js');
+
+  await t.test('1. Valid JWT Bearer token successfully authenticates and calls next()', async () => {
+    let nextCalled = false;
+    const testUserId = '65f1a2b3c4d5e6f7a8b9c0d1';
+    const validToken = jwt.sign(
+      { id: testUserId, email: 'student@example.com' },
+      process.env.JWT_SECRET || 'global_student_connect_jwt_secret_dev'
+    );
+
+    const req = {
+      headers: {
+        authorization: `Bearer ${validToken}`,
+      },
+    };
+    const res = {
+      status: () => res,
+      json: () => {},
+    };
+    const next = () => {
+      nextCalled = true;
+    };
+
+    await requireAuth(req, res, next);
+    assert.equal(nextCalled, true, 'next() must be called for valid JWT');
+    assert.equal(req.userId, testUserId);
+    assert.equal(req.user.id, testUserId);
+  });
+
+  await t.test('2. Expired JWT Bearer token is rejected with 401 and descriptive message', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const expiredToken = jwt.sign(
+      { id: '65f1a2b3c4d5e6f7a8b9c0d1' },
+      process.env.JWT_SECRET || 'global_student_connect_jwt_secret_dev',
+      { expiresIn: '-1s' }
+    );
+
+    const req = {
+      headers: {
+        authorization: `Bearer ${expiredToken}`,
+      },
+    };
+    const res = {
+      status: (code) => {
+        statusCode = code;
+        return res;
+      },
+      json: (data) => {
+        jsonResponse = data;
+      },
+    };
+
+    await requireAuth(req, res, () => {});
+    assert.equal(statusCode, 401);
+    assert.equal(jsonResponse.success, false);
+    assert.match(jsonResponse.message, /expired/i);
+  });
+
+  await t.test('3. Invalid / forged JWT signature is rejected with 401', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const tamperedToken = jwt.sign(
+      { id: '65f1a2b3c4d5e6f7a8b9c0d1' },
+      'wrong_secret_key_tampered'
+    );
+
+    const req = {
+      headers: {
+        authorization: `Bearer ${tamperedToken}`,
+      },
+    };
+    const res = {
+      status: (code) => {
+        statusCode = code;
+        return res;
+      },
+      json: (data) => {
+        jsonResponse = data;
+      },
+    };
+
+    await requireAuth(req, res, () => {});
+    assert.equal(statusCode, 401);
+    assert.equal(jsonResponse.success, false);
+  });
+
+  await t.test('4. Missing authentication header returns 401 Authentication required', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const req = { headers: {} };
+    const res = {
+      status: (code) => {
+        statusCode = code;
+        return res;
+      },
+      json: (data) => {
+        jsonResponse = data;
+      },
+    };
+
+    await requireAuth(req, res, () => {});
+    assert.equal(statusCode, 401);
+    assert.equal(jsonResponse.success, false);
+    assert.match(jsonResponse.message, /Authentication required/);
+  });
+
+  await t.test('5. Supports x-user-id header for service integration', async () => {
+    let nextCalled = false;
+    const req = {
+      headers: {
+        'x-user-id': '65f1a2b3c4d5e6f7a8b9c0d1',
+      },
+    };
+    const res = {
+      status: () => res,
+      json: () => {},
+    };
+    const next = () => {
+      nextCalled = true;
+    };
+
+    await requireAuth(req, res, next);
+    assert.equal(nextCalled, true);
+    assert.equal(req.userId, '65f1a2b3c4d5e6f7a8b9c0d1');
+  });
+});
+
+test('Authentication & Student Profile - Feature 4: Get Profile API', async (t) => {
+  await t.test('1. Get profile successfully returns student information without password', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const mockProfile = {
+      _id: '65f1a2b3c4d5e6f7a8b9c0d1',
+      name: 'Kruthika Priyadarshini',
+      email: 'kruthika@example.com',
+      country: 'India',
+      timezone: 'Asia/Kolkata',
+      age: 18,
+      gradeLevel: 'College Freshman',
+      languages: ['English', 'Telugu'],
+      interests: ['Web Development', 'AI'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const originalFindById = User.findById;
+    User.findById = () => ({
+      select: async () => mockProfile,
+    });
+
+    try {
+      const req = {
+        userId: '65f1a2b3c4d5e6f7a8b9c0d1',
+        user: { id: '65f1a2b3c4d5e6f7a8b9c0d1' },
+      };
+      const res = {
+        status: (code) => {
+          statusCode = code;
+          return res;
+        },
+        json: (data) => {
+          jsonResponse = data;
+        },
+      };
+
+      await getProfile(req, res, () => {});
+      assert.equal(statusCode, 200);
+      assert.equal(jsonResponse.success, true);
+      assert.equal(jsonResponse.user.name, 'Kruthika Priyadarshini');
+      assert.equal(jsonResponse.user.email, 'kruthika@example.com');
+      assert.equal(jsonResponse.user.password, undefined, 'Password must never be returned');
+    } finally {
+      User.findById = originalFindById;
+    }
+  });
+
+  await t.test('2. Get profile returns 404 when student record is not found', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const originalFindById = User.findById;
+    User.findById = () => ({
+      select: async () => null,
+    });
+
+    try {
+      const req = {
+        userId: '65f1a2b3c4d5e6f7a8b9c000',
+        user: { id: '65f1a2b3c4d5e6f7a8b9c000' },
+      };
+      const res = {
+        status: (code) => {
+          statusCode = code;
+          return res;
+        },
+        json: (data) => {
+          jsonResponse = data;
+        },
+      };
+
+      await getProfile(req, res, () => {});
+      assert.equal(statusCode, 404);
+      assert.equal(jsonResponse.success, false);
+      assert.equal(jsonResponse.message, 'Student profile not found');
+    } finally {
+      User.findById = originalFindById;
+    }
+  });
+
+  await t.test('3. Get profile returns 401 when unauthenticated', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const req = {};
+    const res = {
+      status: (code) => {
+        statusCode = code;
+        return res;
+      },
+      json: (data) => {
+        jsonResponse = data;
+      },
+    };
+
+    await getProfile(req, res, () => {});
+    assert.equal(statusCode, 401);
+    assert.equal(jsonResponse.success, false);
+  });
+});
+
+test('Authentication & Student Profile - Feature 5: Update Profile API', async (t) => {
+  await t.test('1. Successfully updates student profile fields and omits password', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const mockUser = {
+      _id: '65f1a2b3c4d5e6f7a8b9c0d1',
+      name: 'Old Name',
+      email: 'student@example.com',
+      password: 'hashedSecretPassword',
+      country: 'Old Country',
+      timezone: 'UTC',
+      age: 16,
+      gradeLevel: '10th',
+      languages: ['English'],
+      interests: ['Reading'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      save: async function () {
+        return this;
+      },
+    };
+
+    const originalFindById = User.findById;
+    User.findById = async () => mockUser;
+
+    try {
+      const req = {
+        userId: '65f1a2b3c4d5e6f7a8b9c0d1',
+        body: {
+          name: 'Updated Student Name',
+          country: 'Germany',
+          timezone: 'Europe/Berlin',
+          age: 18,
+          gradeLevel: '12th Grade',
+          languages: ['German', 'English'],
+          interests: ['Robotics', 'Quantum Computing'],
+        },
+      };
+      const res = {
+        status: (code) => {
+          statusCode = code;
+          return res;
+        },
+        json: (data) => {
+          jsonResponse = data;
+        },
+      };
+
+      await updateProfile(req, res, () => {});
+      assert.equal(statusCode, 200);
+      assert.equal(jsonResponse.success, true);
+      assert.equal(jsonResponse.message, 'Profile updated successfully');
+      assert.equal(jsonResponse.user.name, 'Updated Student Name');
+      assert.equal(jsonResponse.user.country, 'Germany');
+      assert.equal(jsonResponse.user.timezone, 'Europe/Berlin');
+      assert.equal(jsonResponse.user.age, 18);
+      assert.equal(jsonResponse.user.gradeLevel, '12th Grade');
+      assert.deepEqual(jsonResponse.user.languages, ['German', 'English']);
+      assert.deepEqual(jsonResponse.user.interests, ['Robotics', 'Quantum Computing']);
+      assert.equal(jsonResponse.user.password, undefined, 'Password must never be returned');
+      assert.ok(typeof jsonResponse.user.profileCompletion === 'number', 'profileCompletion must be returned');
+    } finally {
+      User.findById = originalFindById;
+    }
+  });
+
+  await t.test('2. Validates against empty name and empty country', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const mockUser = {
+      _id: '65f1a2b3c4d5e6f7a8b9c0d1',
+      name: 'Existing Name',
+      country: 'Existing Country',
+    };
+
+    const originalFindById = User.findById;
+    User.findById = async () => mockUser;
+
+    try {
+      // Test empty name
+      const reqEmptyName = {
+        userId: '65f1a2b3c4d5e6f7a8b9c0d1',
+        body: { name: '   ' },
+      };
+      const res = {
+        status: (code) => {
+          statusCode = code;
+          return res;
+        },
+        json: (data) => {
+          jsonResponse = data;
+        },
+      };
+
+      await updateProfile(reqEmptyName, res, () => {});
+      assert.equal(statusCode, 400);
+      assert.equal(jsonResponse.success, false);
+      assert.equal(jsonResponse.message, 'Name cannot be empty');
+
+      // Test empty country
+      const reqEmptyCountry = {
+        userId: '65f1a2b3c4d5e6f7a8b9c0d1',
+        body: { country: '  ' },
+      };
+
+      await updateProfile(reqEmptyCountry, res, () => {});
+      assert.equal(statusCode, 400);
+      assert.equal(jsonResponse.success, false);
+      assert.equal(jsonResponse.message, 'Country cannot be empty');
+    } finally {
+      User.findById = originalFindById;
+    }
+  });
+
+  await t.test('3. Validates invalid age boundary values', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const mockUser = {
+      _id: '65f1a2b3c4d5e6f7a8b9c0d1',
+    };
+
+    const originalFindById = User.findById;
+    User.findById = async () => mockUser;
+
+    try {
+      const req = {
+        userId: '65f1a2b3c4d5e6f7a8b9c0d1',
+        body: { age: 200 },
+      };
+      const res = {
+        status: (code) => {
+          statusCode = code;
+          return res;
+        },
+        json: (data) => {
+          jsonResponse = data;
+        },
+      };
+
+      await updateProfile(req, res, () => {});
+      assert.equal(statusCode, 400);
+      assert.equal(jsonResponse.success, false);
+      assert.match(jsonResponse.message, /valid age/i);
+    } finally {
+      User.findById = originalFindById;
+    }
+  });
+
+  await t.test('4. Update profile returns 404 when student record not found', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const originalFindById = User.findById;
+    User.findById = async () => null;
+
+    try {
+      const req = {
+        userId: '65f1a2b3c4d5e6f7a8b9c000',
+        body: { name: 'New Name' },
+      };
+      const res = {
+        status: (code) => {
+          statusCode = code;
+          return res;
+        },
+        json: (data) => {
+          jsonResponse = data;
+        },
+      };
+
+      await updateProfile(req, res, () => {});
+      assert.equal(statusCode, 404);
+      assert.equal(jsonResponse.success, false);
+      assert.equal(jsonResponse.message, 'Student profile not found');
+    } finally {
+      User.findById = originalFindById;
+    }
+  });
+
+  await t.test('5. Update profile returns 401 when unauthenticated', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const req = { body: {} };
+    const res = {
+      status: (code) => {
+        statusCode = code;
+        return res;
+      },
+      json: (data) => {
+        jsonResponse = data;
+      },
+    };
+
+    await updateProfile(req, res, () => {});
+    assert.equal(statusCode, 401);
+    assert.equal(jsonResponse.success, false);
+  });
+
+  await t.test('6. Validates bio does not exceed 500 characters', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const mockUser = {
+      _id: '65f1a2b3c4d5e6f7a8b9c0d1',
+    };
+
+    const originalFindById = User.findById;
+    User.findById = async () => mockUser;
+
+    try {
+      const longBio = 'A'.repeat(501);
+      const req = {
+        userId: '65f1a2b3c4d5e6f7a8b9c0d1',
+        body: { bio: longBio },
+      };
+      const res = {
+        status: (code) => {
+          statusCode = code;
+          return res;
+        },
+        json: (data) => {
+          jsonResponse = data;
+        },
+      };
+
+      await updateProfile(req, res, () => {});
+      assert.equal(statusCode, 400);
+      assert.equal(jsonResponse.success, false);
+      assert.equal(jsonResponse.message, 'Bio cannot exceed 500 characters');
+    } finally {
+      User.findById = originalFindById;
+    }
+  });
+});
+
 

@@ -39,6 +39,17 @@ const userSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    bio: {
+      type: String,
+      trim: true,
+      default: '',
+      maxlength: [500, 'Bio cannot exceed 500 characters'],
+    },
+    profilePicture: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     languages: {
       type: [String],
       default: [],
@@ -46,6 +57,10 @@ const userSchema = new mongoose.Schema(
     interests: {
       type: [String],
       default: [],
+    },
+    isProfileComplete: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -72,6 +87,20 @@ userSchema.pre('save', async function () {
 // Compare password method
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Calculate dynamic profile completion percentage
+userSchema.methods.calculateProfileCompletion = function () {
+  let score = 0;
+  if (this.name && this.name.trim()) score += 15;
+  if (this.country && this.country.trim()) score += 15;
+  if (this.age !== undefined && this.age !== null) score += 10;
+  if (this.gradeLevel && this.gradeLevel.trim()) score += 10;
+  if (this.bio && this.bio.trim()) score += 15;
+  if (Array.isArray(this.interests) && this.interests.length > 0) score += 15;
+  if (Array.isArray(this.languages) && this.languages.length > 0) score += 10;
+  if (this.profilePicture && this.profilePicture.trim()) score += 10;
+  return Math.min(score, 100);
 };
 
 const User = mongoose.model('User', userSchema);
