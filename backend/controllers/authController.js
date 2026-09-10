@@ -51,7 +51,7 @@ export const formatUserProfile = (user) => {
     profilePicture: user.profilePicture || '',
     languages: user.languages || [],
     interests: user.interests || [],
-    isProfileComplete: user.isProfileComplete || false,
+    isProfileComplete: user.isProfileComplete !== undefined ? user.isProfileComplete : completionScore >= 80,
     profileCompletion: completionScore,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
@@ -79,15 +79,15 @@ export const signup = async (req, res, next) => {
       interests,
     } = req.body;
 
-    // Validate required fields
-    if (!name || !name.trim()) {
+    // Validate required fields with defensive type checks
+    if (!name || typeof name !== 'string' || !name.trim()) {
       return res.status(400).json({
         success: false,
         message: 'Name is required',
       });
     }
 
-    if (!email || !email.trim()) {
+    if (!email || typeof email !== 'string' || !email.trim()) {
       return res.status(400).json({
         success: false,
         message: 'Email is required',
@@ -102,7 +102,7 @@ export const signup = async (req, res, next) => {
       });
     }
 
-    if (!password) {
+    if (!password || typeof password !== 'string') {
       return res.status(400).json({
         success: false,
         message: 'Password is required',
@@ -116,7 +116,7 @@ export const signup = async (req, res, next) => {
       });
     }
 
-    if (!country || !country.trim()) {
+    if (!country || typeof country !== 'string' || !country.trim()) {
       return res.status(400).json({
         success: false,
         message: 'Country is required',
@@ -148,7 +148,7 @@ export const signup = async (req, res, next) => {
       email: normalizedEmail,
       password,
       country: country.trim(),
-      timezone: timezone && timezone.trim() ? timezone.trim() : 'UTC',
+      timezone: typeof timezone === 'string' && timezone.trim() ? timezone.trim() : 'UTC',
       age: age !== undefined && age !== null && age !== '' ? Number(age) : undefined,
       gradeLevel: typeof resolvedGrade === 'string' ? resolvedGrade.trim() : String(resolvedGrade),
       bio: typeof bio === 'string' ? bio.trim() : '',
@@ -180,14 +180,14 @@ export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !email.trim()) {
+    if (!email || typeof email !== 'string' || !email.trim()) {
       return res.status(400).json({
         success: false,
         message: 'Email is required',
       });
     }
 
-    if (!password) {
+    if (!password || typeof password !== 'string') {
       return res.status(400).json({
         success: false,
         message: 'Password is required',
@@ -303,9 +303,9 @@ export const updateProfile = async (req, res, next) => {
       isProfileComplete,
     } = req.body;
 
-    // Validate and update fields
+    // Validate and update fields with defensive type checks
     if (name !== undefined) {
-      if (!name.trim()) {
+      if (typeof name !== 'string' || !name.trim()) {
         return res.status(400).json({
           success: false,
           message: 'Name cannot be empty',
@@ -315,7 +315,7 @@ export const updateProfile = async (req, res, next) => {
     }
 
     if (country !== undefined) {
-      if (!country.trim()) {
+      if (typeof country !== 'string' || !country.trim()) {
         return res.status(400).json({
           success: false,
           message: 'Country cannot be empty',
@@ -325,7 +325,7 @@ export const updateProfile = async (req, res, next) => {
     }
 
     if (timezone !== undefined) {
-      user.timezone = timezone.trim() || 'UTC';
+      user.timezone = typeof timezone === 'string' && timezone.trim() ? timezone.trim() : 'UTC';
     }
 
     if (age !== undefined) {
@@ -349,13 +349,13 @@ export const updateProfile = async (req, res, next) => {
     }
 
     if (bio !== undefined) {
-      if (typeof bio === 'string' && bio.length > 500) {
+      if (typeof bio !== 'string' || bio.length > 500) {
         return res.status(400).json({
           success: false,
           message: 'Bio cannot exceed 500 characters',
         });
       }
-      user.bio = typeof bio === 'string' ? bio.trim() : '';
+      user.bio = bio.trim();
     }
 
     if (profilePicture !== undefined) {
@@ -374,8 +374,26 @@ export const updateProfile = async (req, res, next) => {
         : (typeof interests === 'string' && interests.trim() ? [interests.trim()] : []);
     }
 
+    // Auto-update isProfileComplete based on completion score if not explicitly passed
+    const completionScore = typeof user.calculateProfileCompletion === 'function'
+      ? user.calculateProfileCompletion()
+      : (() => {
+          let score = 0;
+          if (user.name && user.name.trim()) score += 15;
+          if (user.country && user.country.trim()) score += 15;
+          if (user.age !== undefined && user.age !== null) score += 10;
+          if (user.gradeLevel && user.gradeLevel.trim()) score += 10;
+          if (user.bio && user.bio.trim()) score += 15;
+          if (Array.isArray(user.interests) && user.interests.length > 0) score += 15;
+          if (Array.isArray(user.languages) && user.languages.length > 0) score += 10;
+          if (user.profilePicture && user.profilePicture.trim()) score += 10;
+          return Math.min(score, 100);
+        })();
+
     if (isProfileComplete !== undefined) {
       user.isProfileComplete = Boolean(isProfileComplete);
+    } else {
+      user.isProfileComplete = completionScore >= 80;
     }
 
     const updatedUser = await user.save();

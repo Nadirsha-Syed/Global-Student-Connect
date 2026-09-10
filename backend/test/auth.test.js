@@ -524,6 +524,88 @@ test('Authentication & Student Profile - Feature 3: Auth Middleware', async (t) 
     assert.equal(nextCalled, true);
     assert.equal(req.userId, '65f1a2b3c4d5e6f7a8b9c0d1');
   });
+
+  await t.test('6. Rejects x-user-id header bypass in production mode', async () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+
+    try {
+      let statusCode = 0;
+      let jsonResponse = null;
+
+      const req = {
+        headers: {
+          'x-user-id': '65f1a2b3c4d5e6f7a8b9c0d1',
+        },
+      };
+      const res = {
+        status: (code) => {
+          statusCode = code;
+          return res;
+        },
+        json: (data) => {
+          jsonResponse = data;
+        },
+      };
+
+      await requireAuth(req, res, () => {});
+      assert.equal(statusCode, 401, 'Must reject dev fallbacks in production');
+      assert.equal(jsonResponse.success, false);
+    } finally {
+      process.env.NODE_ENV = originalEnv;
+    }
+  });
+
+  await t.test('7. Rejects token belonging to deleted user with 401', async () => {
+    const validToken = jwt.sign(
+      { id: '65f1a2b3c4d5e6f7a8b9c0d1', email: 'deleted@example.com' },
+      process.env.JWT_SECRET || 'global_student_connect_jwt_secret_dev'
+    );
+
+    const mongooseModule = await import('mongoose');
+    const originalReadyState = mongooseModule.default.connection.readyState;
+    // Simulate DB connected
+    Object.defineProperty(mongooseModule.default.connection, 'readyState', {
+      value: 1,
+      configurable: true,
+    });
+
+    const originalFindById = User.findById;
+    User.findById = () => ({
+      select: async () => null, // user deleted
+    });
+
+    try {
+      let statusCode = 0;
+      let jsonResponse = null;
+
+      const req = {
+        headers: {
+          authorization: `Bearer ${validToken}`,
+        },
+      };
+      const res = {
+        status: (code) => {
+          statusCode = code;
+          return res;
+        },
+        json: (data) => {
+          jsonResponse = data;
+        },
+      };
+
+      await requireAuth(req, res, () => {});
+      assert.equal(statusCode, 401);
+      assert.equal(jsonResponse.success, false);
+      assert.match(jsonResponse.message, /no longer exists/i);
+    } finally {
+      User.findById = originalFindById;
+      Object.defineProperty(mongooseModule.default.connection, 'readyState', {
+        value: originalReadyState,
+        configurable: true,
+      });
+    }
+  });
 });
 
 test('Authentication & Student Profile - Feature 4: Get Profile API', async (t) => {
@@ -867,6 +949,80 @@ test('Authentication & Student Profile - Feature 5: Update Profile API', async (
       User.findById = originalFindById;
     }
   });
+
+  await t.test('7. Auto-updates isProfileComplete when not explicitly provided', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const mockUser = {
+      _id: '65f1a2b3c4d5e6f7a8b9c0d1',
+      name: 'Full Profile Student',
+      email: 'full@example.com',
+      country: 'India',
+      age: 20,
+      gradeLevel: 'College',
+      bio: 'Comprehensive bio here',
+      languages: ['English'],
+      interests: ['Coding'],
+      profilePicture: 'https://example.com/pic.jpg',
+      calculateProfileCompletion: () => 100,
+      save: async function () { return this; },
+    };
+
+    const originalFindById = User.findById;
+    User.findById = async () => mockUser;
+
+    try {
+      const req = {
+        userId: '65f1a2b3c4d5e6f7a8b9c0d1',
+        body: { name: 'Full Profile Student' },
+      };
+      const res = {
+        status: (code) => {
+          statusCode = code;
+          return res;
+        },
+        json: (data) => {
+          jsonResponse = data;
+        },
+      };
+
+      await updateProfile(req, res, () => {});
+      assert.equal(statusCode, 200);
+      assert.equal(jsonResponse.user.isProfileComplete, true, 'isProfileComplete should auto-set to true for >= 80%');
+    } finally {
+      User.findById = originalFindById;
+    }
+  });
+
+  await t.test('8. Type checking: non-string fields in signup return 400 instead of 500', async () => {
+    let statusCode = 0;
+    let jsonResponse = null;
+
+    const req = {
+      body: {
+        name: 12345, // invalid type
+        email: 'test@example.com',
+        password: 'password123',
+        country: 'India',
+      },
+    };
+    const res = {
+      status: (code) => {
+        statusCode = code;
+        return res;
+      },
+      json: (data) => {
+        jsonResponse = data;
+      },
+    };
+
+    await signup(req, res, () => {});
+    assert.equal(statusCode, 400);
+    assert.equal(jsonResponse.success, false);
+    assert.equal(jsonResponse.message, 'Name is required');
+  });
 });
+
 
 

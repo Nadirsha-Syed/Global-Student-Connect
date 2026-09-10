@@ -10,8 +10,8 @@ import User from '../models/User.js';
  * 
  * Supports:
  * 1. Bearer JWT tokens via `Authorization` header (cryptographically verified).
- * 2. `x-user-id` header for module-level integration tests.
- * 3. Raw 24-character hex ObjectId tokens for direct testing.
+ * 2. `x-user-id` header for module-level integration tests (guarded in non-production).
+ * 3. Raw 24-character hex ObjectId tokens for direct testing (guarded in non-production).
  * 4. Upstream pre-authenticated req.user objects.
  */
 export const requireAuth = async (req, res, next) => {
@@ -21,12 +21,14 @@ export const requireAuth = async (req, res, next) => {
     return next();
   }
 
-  // 2. Check x-user-id header (direct module-level testing contract)
-  const headerUserId = req.headers['x-user-id'];
-  if (headerUserId) {
-    req.user = { id: headerUserId, _id: headerUserId };
-    req.userId = headerUserId.toString();
-    return next();
+  // 2. Check x-user-id header (allow dev/test fallbacks only in non-production)
+  if (process.env.NODE_ENV !== 'production') {
+    const headerUserId = req.headers['x-user-id'];
+    if (headerUserId) {
+      req.user = { id: headerUserId, _id: headerUserId };
+      req.userId = headerUserId.toString();
+      return next();
+    }
   }
 
   // 3. Check Authorization header
@@ -36,8 +38,8 @@ export const requireAuth = async (req, res, next) => {
       ? authHeader.slice(7).trim()
       : authHeader.trim();
 
-    // If token is a 24-character hex MongoDB ObjectId (direct testing/mock token)
-    if (/^[0-9a-fA-F]{24}$/.test(token)) {
+    // Allow raw 24-char ObjectId mock tokens only in non-production
+    if (process.env.NODE_ENV !== 'production' && /^[0-9a-fA-F]{24}$/.test(token)) {
       req.user = { id: token, _id: token };
       req.userId = token;
       return next();
@@ -52,17 +54,22 @@ export const requireAuth = async (req, res, next) => {
       const resolvedId = decoded.id || decoded._id || decoded.userId || decoded.sub;
 
       if (resolvedId) {
-        // If MongoDB is connected, load user model instance without password
+        // If MongoDB is connected, verify user exists and load model instance without password
         if (mongoose.connection.readyState === 1) {
           try {
             const dbUser = await User.findById(resolvedId).select('-password');
-            if (dbUser) {
-              req.user = dbUser;
-              req.userId = dbUser._id.toString();
-              return next();
+            if (!dbUser) {
+              return res.status(401).json({
+                success: false,
+                error: 'Unauthorized',
+                message: 'The user belonging to this token no longer exists.',
+              });
             }
+            req.user = dbUser;
+            req.userId = dbUser._id.toString();
+            return next();
           } catch {
-            // If lookup fails, fallback to decoded token payload
+            // Fallback to token payload only if DB query throws an error in test mode
           }
         }
 
@@ -81,12 +88,14 @@ export const requireAuth = async (req, res, next) => {
     }
   }
 
-  // 4. Check query or body fallback for local dev & testing
-  const fallbackId = req.query?.userId || req.body?.userId;
-  if (fallbackId && /^[0-9a-fA-F]{24}$/.test(fallbackId)) {
-    req.user = { id: fallbackId, _id: fallbackId };
-    req.userId = fallbackId.toString();
-    return next();
+  // 4. Check query or body fallback for local dev & testing (non-production only)
+  if (process.env.NODE_ENV !== 'production') {
+    const fallbackId = req.query?.userId || req.body?.userId;
+    if (fallbackId && /^[0-9a-fA-F]{24}$/.test(fallbackId)) {
+      req.user = { id: fallbackId, _id: fallbackId };
+      req.userId = fallbackId.toString();
+      return next();
+    }
   }
 
   return res.status(401).json({
