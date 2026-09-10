@@ -38,7 +38,7 @@ export function Profile({ initialTab = 'overview' }) {
     institution: user?.institution || 'Delhi Technological University',
     timezone: user?.timezone || 'Asia/Kolkata (IST +5:30)',
     bio: user?.bio || 'I love technology, sports and learning about different cultures and making friends across borders!',
-    avatar: user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
+    avatar: user?.avatar || '🧑‍💻',
     interests: user?.interests || ['Technology', 'Science', 'Sports', 'Culture'],
     languages: user?.languages || ['English', 'Hindi'],
   });

@@ -17,6 +17,7 @@ import {
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
+import Avatar from '../components/common/Avatar';
 
 export function Landing() {
   const steps = [
@@ -56,7 +57,7 @@ export function Landing() {
       country: 'Japan',
       flag: '🇯🇵',
       uni: 'Tokyo University',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
+      avatar: '👩‍🎨',
       interests: ['Anime & Manga', 'Robotics', 'Tea Culture'],
       quote: 'Talking with students in India and Canada helped me gain confidence in conversational English while sharing Tokyo campus culture!',
     },
@@ -65,7 +66,7 @@ export function Landing() {
       country: 'Brazil',
       flag: '🇧🇷',
       uni: 'University of São Paulo',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
+      avatar: '🧑‍🌾',
       interests: ['Environmental Tech', 'Samba', 'Football'],
       quote: 'I made genuine friendships with engineering students across the ocean. We even collaborate on global climate hackathons now.',
     },
@@ -74,7 +75,7 @@ export function Landing() {
       country: 'Spain',
       flag: '🇪🇸',
       uni: 'Autonomous Univ. of Madrid',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&auto=format&fit=crop&q=80',
+      avatar: '👩‍🎓',
       interests: ['Architecture', 'Flamenco', 'Culinary Arts'],
       quote: 'The guided topic cards made our first conversation so natural and warm. It feels like travelling without leaving your dorm room.',
     },
@@ -316,66 +317,123 @@ export function Landing() {
                 overflow: 'hidden',
                 boxShadow: '0 20px 40px -15px rgba(37, 99, 235, 0.25)',
                 border: '3px solid #FFFFFF',
-                background: 'linear-gradient(145deg, #EFF6FF 0%, #DBEAFE 100%)',
+                background: 'linear-gradient(145deg, #EFF6FF 0%, #E0E7FF 100%)',
+                padding: '2rem 1.5rem',
+                minHeight: 420,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
               }}
             >
-              <img
-                src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80"
-                alt="Global students smiling and connecting together"
-                style={{
-                  width: '100%',
-                  height: 420,
-                  objectFit: 'cover',
-                  display: 'block',
-                }}
-              />
+              {/* Header inside the stage */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    padding: '0.4rem 0.85rem',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    color: 'var(--primary)',
+                    boxShadow: 'var(--shadow-sm)',
+                  }}
+                >
+                  <Globe2 size={14} />
+                  <span>Tokyo ⇄ New Delhi Cultural Exchange</span>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#10B981' }} />
+                </div>
 
-              {/* Floating Pill Overlay Badges */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '1.25rem',
-                  left: '1.25rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.94)',
-                  backdropFilter: 'blur(8px)',
-                  padding: '0.5rem 1rem',
-                  borderRadius: 'var(--radius-full)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  boxShadow: 'var(--shadow-md)',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  color: 'var(--text-main)',
-                }}
-              >
-                <span style={{ fontSize: '1.1rem' }}>🇯🇵</span>
-                <span>Tokyo</span>
-                <span style={{ color: 'var(--text-muted)' }}>⇄</span>
-                <span style={{ fontSize: '1.1rem' }}>🇮🇳</span>
-                <span>New Delhi</span>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#10B981' }} />
+                <div
+                  style={{
+                    backgroundColor: '#ECFDF5',
+                    color: '#065F46',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: 'var(--radius-full)',
+                    border: '1px solid #A7F3D0',
+                  }}
+                >
+                  ⚡ 92% Match Score
+                </div>
               </div>
 
+              {/* Character 1 (Ruthvik) and Speech Bubble */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
+                <Avatar emoji="🧑‍💻" name="Ruthvik Reddy" flag="🇮🇳" size="lg" isOnline={true} />
+                <div
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    padding: '0.85rem 1rem',
+                    borderRadius: '0 16px 16px 16px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                    maxWidth: 320,
+                    fontSize: '0.875rem',
+                    border: '1px solid var(--border-color)',
+                  }}
+                >
+                  <div style={{ fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.2rem', fontSize: '0.8rem' }}>
+                    Ruthvik Reddy <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>• India 🇮🇳</span>
+                  </div>
+                  <p style={{ margin: 0, color: 'var(--text-body)', lineHeight: 1.4 }}>
+                    "Namaste! Excited for our chat about campus tech clubs and sharing North vs South Indian food!"
+                  </p>
+                </div>
+              </div>
+
+              {/* Character 2 (Yuki) and Speech Bubble */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', alignSelf: 'flex-end', flexDirection: 'row-reverse', marginBottom: '1.5rem' }}>
+                <Avatar emoji="👩‍🎨" name="Yuki Sato" flag="🇯🇵" size="lg" isOnline={true} />
+                <div
+                  style={{
+                    backgroundColor: '#EFF6FF',
+                    padding: '0.85rem 1rem',
+                    borderRadius: '16px 0 16px 16px',
+                    boxShadow: '0 4px 12px rgba(37,99,235,0.08)',
+                    maxWidth: 320,
+                    fontSize: '0.875rem',
+                    border: '1px solid rgba(37,99,235,0.2)',
+                  }}
+                >
+                  <div style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: '0.2rem', fontSize: '0.8rem', textAlign: 'right' }}>
+                    Yuki Sato <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>• Japan 🇯🇵</span>
+                  </div>
+                  <p style={{ margin: 0, color: 'var(--text-main)', lineHeight: 1.4 }}>
+                    "Kon'nichiwa! Can't wait to share autumn festival traditions in Tokyo and talk about robotics clubs!"
+                  </p>
+                </div>
+              </div>
+
+              {/* Active Global Student Community Bar */}
               <div
                 style={{
-                  position: 'absolute',
-                  bottom: '1.25rem',
-                  right: '1.25rem',
                   backgroundColor: 'rgba(255, 255, 255, 0.94)',
                   backdropFilter: 'blur(8px)',
                   padding: '0.75rem 1.25rem',
                   borderRadius: 'var(--radius-xl)',
-                  boxShadow: 'var(--shadow-lg)',
-                  maxWidth: 260,
+                  boxShadow: 'var(--shadow-md)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                  <ShieldCheck size={18} color="#10B981" />
-                  <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#065F46' }}>Verified Student Only</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Avatar emoji="🧑‍🌾" size="sm" flag="🇧🇷" />
+                  <Avatar emoji="👩‍🔬" size="sm" flag="🇨🇦" />
+                  <Avatar emoji="👩‍🎓" size="sm" flag="🇪🇸" />
+                  <Avatar emoji="🧑‍🚀" size="sm" flag="🇮🇪" />
+                  <Avatar emoji="👨‍💻" size="sm" flag="🇯🇵" />
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  Institutional email verification ensures trusted, friendly conversations.
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#065F46', display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+                    <ShieldCheck size={14} color="#10B981" />
+                    <span>Verified Students</span>
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>10,000+ Cross-Cultural Friends</div>
                 </div>
               </div>
             </div>
@@ -497,17 +555,7 @@ export function Landing() {
             <Card key={idx} style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
-                  <img
-                    src={student.avatar}
-                    alt={student.name}
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 'var(--radius-full)',
-                      objectFit: 'cover',
-                      border: '2px solid var(--primary-light)',
-                    }}
-                  />
+                  <Avatar emoji={student.avatar} name={student.name} flag={student.flag} size="lg" />
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <span style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-main)' }}>{student.name}</span>

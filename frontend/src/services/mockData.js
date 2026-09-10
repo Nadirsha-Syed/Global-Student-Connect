@@ -12,7 +12,7 @@ export const INITIAL_STUDENT_PROFILE = {
   institution: 'Delhi Technological University',
   timezone: 'Asia/Kolkata (IST +5:30)',
   bio: 'I love technology, sports, and learning about different cultures and making friends across borders!',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
+  avatar: '🧑‍💻',
   completionPercentage: 80,
   isProfileComplete: true,
   interests: ['Technology', 'Science', 'Sports', 'Culture'],
@@ -28,7 +28,7 @@ export const INITIAL_STUDENT_PROFILE = {
     partnerName: 'Yuki Sato',
     partnerCountry: 'Japan',
     partnerFlag: '🇯🇵',
-    partnerAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80',
+    partnerAvatar: '👩‍🎨',
     date: 'Tomorrow, 4:00 PM',
     topic: 'Student Life in Tokyo vs New Delhi',
     meetingId: 'meet-yuki-ruthvik',
@@ -63,12 +63,8 @@ export const MOCK_MATCHES = [
     educationLevel: 'University',
     institution: 'Waseda University, Tokyo',
     matchScore: 92,
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=600&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&auto=format&fit=crop&q=80'
-    ],
+    avatar: '👩‍🎨',
+    gallery: ['🎨 Digital Art', '🍵 Tea Culture', '🤖 Robotics Club'],
     interests: ['Music', 'Travel', 'Anime', 'Photography'],
     sharedInterests: ['Music', 'Travel'],
     languages: ['Japanese', 'English'],
@@ -86,11 +82,8 @@ export const MOCK_MATCHES = [
     educationLevel: 'University',
     institution: 'University of Toronto',
     matchScore: 88,
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&auto=format&fit=crop&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&auto=format&fit=crop&q=80'
-    ],
+    avatar: '👩‍🔬',
+    gallery: ['🔬 Chemistry Lab', '⛸️ Ice Skating', '📚 Book Debate Club'],
     interests: ['Sports', 'Education', 'Book Stories', 'Science'],
     sharedInterests: ['Sports', 'Science'],
     languages: ['English', 'French'],
@@ -108,10 +101,8 @@ export const MOCK_MATCHES = [
     educationLevel: 'College',
     institution: 'University of São Paulo',
     matchScore: 85,
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80'
-    ],
+    avatar: '🧑‍🌾',
+    gallery: ['⚽ Campus Football', '🌿 Amazon Drones', '☕ Coffee Tasting'],
     interests: ['Football', 'Culture', 'Food & Cooking', 'Sports'],
     sharedInterests: ['Sports', 'Culture'],
     languages: ['Portuguese', 'English', 'Spanish'],
@@ -129,10 +120,8 @@ export const MOCK_MATCHES = [
     educationLevel: 'University',
     institution: 'Complutense University of Madrid',
     matchScore: 88,
-    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&auto=format&fit=crop&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&auto=format&fit=crop&q=80'
-    ],
+    avatar: '👩‍🎓',
+    gallery: ['🏛️ Prado Museum', '💃 Flamenco Dance', '🥘 Tapas Evenings'],
     interests: ['Art', 'Travel', 'Photography', 'Culture'],
     sharedInterests: ['Culture'],
     languages: ['Spanish', 'English', 'Italian'],
@@ -150,10 +139,8 @@ export const MOCK_MATCHES = [
     educationLevel: 'College',
     institution: 'Trinity College Dublin',
     matchScore: 85,
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80'
-    ],
+    avatar: '🧑‍🚀',
+    gallery: ['🪈 Irish Flute', '⚡ Renewable Tech', '🍀 Gaelic Hurling'],
     interests: ['Music', 'Science', 'Environment', 'Technology'],
     sharedInterests: ['Technology', 'Science'],
     languages: ['English', 'Irish'],
@@ -171,14 +158,12 @@ export const MOCK_MATCHES = [
     educationLevel: 'University',
     institution: 'Tokyo Institute of Technology',
     matchScore: 92,
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&auto=format&fit=crop&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&auto=format&fit=crop&q=80'
-    ],
+    avatar: '👨‍💻',
+    gallery: ['🤖 Akihabara Tech', '🎮 Game Development', '🍜 Ramen Quest'],
     interests: ['Technology', 'Science', 'Travel', 'Gaming'],
     sharedInterests: ['Technology', 'Science'],
     languages: ['Japanese', 'English'],
-    bio: 'Robotics engineering student excited about AI in education and cross-border collaborative research projects.',
+    bio: 'Mechanical robotics enthusiast building autonomous drones. Passionate about cross-border engineering collaborations!',
     verifiedStudent: true,
     timezone: 'Asia/Tokyo (JST +9:00)',
   },

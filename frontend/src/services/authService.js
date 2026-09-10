@@ -70,7 +70,11 @@ export const authService = {
     const saved = localStorage.getItem(USER_KEY);
     if (!saved) return INITIAL_STUDENT_PROFILE; // Default to Ruthvik for rich preview
     try {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.avatar && (parsed.avatar.startsWith('http') || parsed.avatar.startsWith('/'))) {
+        parsed.avatar = INITIAL_STUDENT_PROFILE.avatar;
+      }
+      return parsed;
     } catch {
       return INITIAL_STUDENT_PROFILE;
     }

@@ -11,6 +11,7 @@ import {
 import Modal from '../common/Modal';
 import Badge, { MatchScoreBadge } from '../common/Badge';
 import Button from '../common/Button';
+import Avatar from '../common/Avatar';
 
 export function MatchSpotlightModal({
   match,
@@ -21,57 +22,59 @@ export function MatchSpotlightModal({
   isConnecting = false,
   hasConnected = false,
 }) {
-  const [activePhotoIdx, setActivePhotoIdx] = useState(0);
-
   if (!match) return null;
 
-  const gallery = match.gallery || [match.avatar];
+  const gallery = match.gallery || [];
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Student Profile" maxWidth={620}>
       <div>
-        {/* Photo Gallery with thumbnails (matching section 3.2) */}
-        <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-          <div
-            style={{
-              width: '100%',
-              height: 260,
-              borderRadius: 'var(--radius-md)',
-              overflow: 'hidden',
-              backgroundColor: 'var(--bg-subtle)',
-              marginBottom: '0.75rem',
-              boxShadow: 'var(--shadow-sm)',
-            }}
-          >
-            <img
-              src={gallery[activePhotoIdx] || match.avatar}
-              alt={match.name}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+        {/* Student Emoji Character Spotlight Card */}
+        <div
+          style={{
+            marginBottom: '1.5rem',
+            textAlign: 'center',
+            padding: '1.75rem 1rem',
+            borderRadius: 'var(--radius-xl)',
+            background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
+            border: '1px solid rgba(37, 99, 235, 0.15)',
+          }}
+        >
+          <Avatar
+            emoji={match.avatar}
+            name={match.name}
+            flag={match.flag}
+            size="xl"
+            isOnline={true}
+            style={{ marginBottom: '0.85rem' }}
+          />
+          <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.25rem' }}>
+            {match.name} {match.flag}
+          </div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+            {match.institution} • {match.country}
           </div>
 
-          {gallery.length > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-              {gallery.map((img, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setActivePhotoIdx(idx)}
-                  style={{
-                    width: 54,
-                    height: 54,
-                    borderRadius: 'var(--radius-sm)',
-                    overflow: 'hidden',
-                    border: activePhotoIdx === idx ? '2px solid var(--primary)' : '1px solid var(--border-subtle)',
-                    cursor: 'pointer',
-                    padding: 0,
-                  }}
-                >
-                  <img src={img} alt="thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Cultural interests & passions pills */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem' }}>
+            {gallery.map((tag, idx) => (
+              <span
+                key={idx}
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  color: 'var(--primary-dark)',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: 'var(--radius-full)',
+                  boxShadow: 'var(--shadow-sm)',
+                  border: '1px solid var(--border-color)',
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* Name, Flag, Compatibility Header */}

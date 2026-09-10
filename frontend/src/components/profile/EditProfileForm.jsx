@@ -34,11 +34,19 @@ export function EditProfileForm({ profile, onSave, loading }) {
     }
   };
 
-  const sampleAvatars = [
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&auto=format&fit=crop&q=80',
+  const studentEmojiOptions = [
+    { emoji: '🧑‍💻', label: 'Tech / Coding' },
+    { emoji: '👩‍🎓', label: 'Scholar' },
+    { emoji: '👨‍🎨', label: 'Art & Design' },
+    { emoji: '👩‍🔬', label: 'Science' },
+    { emoji: '🧑‍🌾', label: 'Ecology' },
+    { emoji: '🧑‍🚀', label: 'Engineering' },
+    { emoji: '👩‍💻', label: 'Developer' },
+    { emoji: '👨‍🎓', label: 'Graduate' },
+    { emoji: '🧕', label: 'Culture' },
+    { emoji: '👱‍♂️', label: 'Sports' },
+    { emoji: '👩‍🎨', label: 'Music' },
+    { emoji: '👨‍💻', label: 'Robotics' },
   ];
 
   return (
@@ -77,59 +85,55 @@ export function EditProfileForm({ profile, onSave, loading }) {
         >
           <div style={{ position: 'relative', display: 'inline-block', marginBottom: '0.75rem' }}>
             <Avatar
-              src={formData.avatar}
-              alt={formData.name}
+              emoji={formData.avatar}
+              name={formData.name}
               size="xl"
               flag={formData.flag}
               isOnline={true}
             />
-            <button
-              type="button"
-              onClick={() => {
-                // Cycle avatar for easy interactive preview
-                const currentIdx = sampleAvatars.indexOf(formData.avatar);
-                const nextAvatar = sampleAvatars[(currentIdx + 1) % sampleAvatars.length];
-                handleChange({ avatar: nextAvatar });
-              }}
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                right: 0,
-                backgroundColor: 'var(--primary)',
-                color: '#ffffff',
-                border: '2px solid #ffffff',
-                borderRadius: '50%',
-                width: 32,
-                height: 32,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                boxShadow: 'var(--shadow-sm)',
-              }}
-              title="Click to cycle sample student photo"
-            >
-              <Camera size={16} />
-            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              const currentIdx = sampleAvatars.indexOf(formData.avatar);
-              const nextAvatar = sampleAvatars[(currentIdx + 1) % sampleAvatars.length];
-              handleChange({ avatar: nextAvatar });
-            }}
+          
+          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+            Choose Your Student Emoji Character
+          </div>
+          <div
             style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--primary)',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              cursor: 'pointer',
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              maxWidth: 420,
+              margin: '0 auto',
             }}
           >
-            Change Photo
-          </button>
+            {studentEmojiOptions.map((opt) => {
+              const isSelected = formData.avatar === opt.emoji;
+              return (
+                <button
+                  key={opt.emoji}
+                  type="button"
+                  onClick={() => handleChange({ avatar: opt.emoji })}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    padding: '0.35rem 0.65rem',
+                    borderRadius: 'var(--radius-full)',
+                    border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-color)',
+                    backgroundColor: isSelected ? 'var(--primary-subtle)' : '#FFFFFF',
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    fontWeight: isSelected ? 700 : 500,
+                    transition: 'all 0.15s ease',
+                  }}
+                  title={opt.label}
+                >
+                  <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{opt.emoji}</span>
+                  <span style={{ color: isSelected ? 'var(--primary)' : 'var(--text-muted)' }}>{opt.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Inputs */}
