@@ -131,7 +131,6 @@ export function Login() {
                 setMode('signup');
                 setAuthError(null);
               }}
-              onForgotPassword={() => setShowVerification(true)}
               loading={loading}
               error={authError}
             />
