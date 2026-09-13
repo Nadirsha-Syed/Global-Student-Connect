@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import React, { Component, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -8,6 +8,9 @@ import Profile from './pages/Profile';
 import Matching from './pages/Matching';
 import Meetings from './pages/Meetings';
 import Reflections from './pages/Reflections';
+import VideoCall from './pages/VideoCall';
+import ReflectionPage from './pages/ReflectionPage';
+import ReflectionSuccessPage from './pages/ReflectionSuccessPage';
 
 // Error Boundary to prevent blank white screens if any subcomponent throws
 class ErrorBoundary extends Component {
@@ -21,7 +24,7 @@ class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('Student UI ErrorBoundary caught:', error, errorInfo);
+    console.error('Global Student Connect ErrorBoundary caught:', error, errorInfo);
   }
 
   render() {
@@ -82,45 +85,148 @@ class ErrorBoundary extends Component {
   }
 }
 
-// Reserved placeholder component for Frontend Developer 2's future screens
-function ReservedFeaturePlaceholder({ featureName, developerRole }) {
+// Live WebRTC Video Call Route with Student Context & Post-call Navigation
+function VideoCallRoute() {
+  const { roomId: urlRoomId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const roomId = urlRoomId || 'room-global-study-101';
+  const sessionTopic = 'Global Student Exchange & Cultural Dialogue';
+
+  // Fallback student profiles for testing when not logged in
+  const currentUser = user ? {
+    id: user.id || user._id,
+    name: user.name,
+    country: user.country,
+    interests: user.interests || ['Global Studies', 'Culture'],
+    languages: user.languages || ['English'],
+  } : {
+    id: 'student-alice',
+    name: 'Alice Smith',
+    country: 'Germany',
+    interests: ['React', 'AI', 'Global Studies'],
+    languages: ['German', 'English'],
+  };
+
+  const peerUser = {
+    id: 'student-kenji',
+    name: 'Kenji Sato',
+    country: 'Japan',
+    interests: ['System Design', 'Culture', 'Robotics'],
+    languages: ['Japanese', 'English'],
+  };
+
   return (
-    <div
-      style={{
-        minHeight: '70vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        padding: '4rem 1.5rem',
-        fontFamily: 'var(--font-sans)',
-      }}
-    >
-      <div
+    <div style={{ minHeight: '100vh', backgroundColor: '#090d16', color: '#f8fafc' }}>
+      <header
         style={{
-          width: 56,
-          height: 56,
-          borderRadius: '50%',
-          backgroundColor: 'var(--primary-subtle, #EFF6FF)',
+          borderBottom: '1px solid #1e293b',
+          padding: '0.875rem 1.5rem',
           display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '1.5rem',
-          marginBottom: '1rem',
+          backgroundColor: '#0f172a',
         }}
       >
-        🚀
-      </div>
-      <h2 style={{ fontSize: '1.5rem', color: 'var(--text-main)', marginBottom: '0.5rem', fontWeight: 700 }}>
-        {featureName}
-      </h2>
-      <p style={{ color: 'var(--text-muted)', maxWidth: 460, margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
-        This module is reserved for <strong>{developerRole}</strong> (Video Call UI, Chat UI, Topic/Question Interface).
-      </p>
-      <a href="/dashboard" className="btn btn-primary btn-sm" style={{ borderRadius: '9999px', textDecoration: 'none' }}>
-        Return to Student Dashboard
-      </a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              padding: '0.45rem 0.9rem',
+              backgroundColor: '#1e293b',
+              color: '#f1f5f9',
+              border: '1px solid #334155',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+            }}
+          >
+            ← Dashboard
+          </button>
+          <span style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
+            Active Profile: <strong style={{ color: '#38bdf8' }}>{currentUser.name} ({currentUser.country})</strong>
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Room: {roomId}</span>
+          <button
+            onClick={() => navigate('/reflections')}
+            style={{
+              padding: '0.45rem 0.9rem',
+              backgroundColor: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+            }}
+          >
+            Reflections
+          </button>
+        </div>
+      </header>
+
+      <main style={{ padding: '1rem' }}>
+        <VideoCall
+          roomId={roomId}
+          currentUser={currentUser}
+          peerUser={peerUser}
+          sessionTopic={sessionTopic}
+          onLeave={() => navigate('/reflection')}
+        />
+      </main>
+    </div>
+  );
+}
+
+// Post-call Reflection Route
+function ReflectionRoute() {
+  const navigate = useNavigate();
+  const [submitted, setSubmitted] = useState(false);
+
+  if (submitted) {
+    return (
+      <ReflectionSuccessPage
+        onNavigate={(path) => navigate(path === '/' ? '/dashboard' : '/reflections')}
+      />
+    );
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-app, #f8fafc)' }}>
+      <header
+        style={{
+          borderBottom: '1px solid var(--border-subtle, #e2e8f0)',
+          padding: '1rem 2rem',
+          backgroundColor: '#ffffff',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--text-main, #0f172a)' }}>
+          Global Student Connect
+        </h2>
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="btn btn-outline-neutral btn-sm"
+        >
+          Skip to Dashboard
+        </button>
+      </header>
+      <ReflectionPage
+        onNavigate={(action) => {
+          if (action === 'reflection-success') {
+            setSubmitted(true);
+          } else {
+            navigate('/dashboard');
+          }
+        }}
+      />
     </div>
   );
 }
@@ -131,9 +237,7 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            {/* ==================================================== */}
-            {/* FRONTEND DEVELOPER 1 — STUDENT UI ROUTES             */}
-            {/* ==================================================== */}
+            {/* Student UI Module Routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -144,28 +248,13 @@ function App() {
             <Route path="/meetings" element={<Meetings />} />
             <Route path="/reflections" element={<Reflections />} />
 
-            {/* ==================================================== */}
-            {/* FRONTEND DEVELOPER 2 — RESERVED VIDEO/CHAT ROUTES    */}
-            {/* (Do not remove or overwrite Developer 2 integration)  */}
-            {/* ==================================================== */}
-            <Route
-              path="/video-call"
-              element={
-                <ReservedFeaturePlaceholder
-                  featureName="Video Call Screen"
-                  developerRole="Frontend Developer 2"
-                />
-              }
-            />
-            <Route
-              path="/chat"
-              element={
-                <ReservedFeaturePlaceholder
-                  featureName="Real-time Chat Screen"
-                  developerRole="Frontend Developer 2"
-                />
-              }
-            />
+            {/* Video Call & AI Co-Pilot Routes */}
+            <Route path="/video-call" element={<VideoCallRoute />} />
+            <Route path="/video-call/:roomId" element={<VideoCallRoute />} />
+
+            {/* Post-Call Reflection Form Routes */}
+            <Route path="/reflection" element={<ReflectionRoute />} />
+            <Route path="/reflection/:sessionId" element={<ReflectionRoute />} />
 
             {/* Fallback route */}
             <Route path="*" element={<Navigate to="/" replace />} />
