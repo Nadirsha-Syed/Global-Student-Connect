@@ -3,7 +3,7 @@ import { Mail, ArrowLeft, RefreshCw, ExternalLink } from 'lucide-react';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 
-export function EmailVerificationModal({ isOpen, onClose, email = 'ruthvik@example.com', onVerified }) {
+export function EmailVerificationModal({ isOpen, onClose, email = 'elena.rostova@student.edu', onVerified }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Verify Your Student Email" maxWidth={480}>
       <div style={{ textAlign: 'center', padding: '1rem 0.5rem' }}>

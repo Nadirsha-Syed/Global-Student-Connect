@@ -10,7 +10,8 @@
     "test": "node --test src/modules/matching-scheduling/test/matching-scheduling.test.js test/auth.test.js test/ai.test.js",
     "test:auth": "node --test test/auth.test.js",
     "test:ai": "node --test test/ai.test.js",
-    "test:match": "node --test src/modules/matching-scheduling/test/matching-scheduling.test.js"
+    "test:match": "node --test src/modules/matching-scheduling/test/matching-scheduling.test.js",
+    "seed": "node scripts/resetAndSeed.js"
   },
   "keywords": [
     "mern",

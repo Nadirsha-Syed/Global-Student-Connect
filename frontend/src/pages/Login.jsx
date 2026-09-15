@@ -152,7 +152,7 @@ export function Login() {
       <EmailVerificationModal
         isOpen={showVerification}
         onClose={() => setShowVerification(false)}
-        email={registeredEmail || 'ruthvik@example.com'}
+        email={registeredEmail || 'elena.rostova@student.edu'}
         onVerified={() => {
           setShowVerification(false);
           navigate('/dashboard');

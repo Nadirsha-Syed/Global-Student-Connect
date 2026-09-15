@@ -68,7 +68,7 @@ export const authService = {
    */
   getCurrentUser() {
     const saved = localStorage.getItem(USER_KEY);
-    if (!saved) return INITIAL_STUDENT_PROFILE; // Default to Ruthvik for rich preview
+    if (!saved) return INITIAL_STUDENT_PROFILE; // Default to Elena (authentic student in DB)
     try {
       const parsed = JSON.parse(saved);
       if (parsed && parsed.avatar && (parsed.avatar.startsWith('http') || parsed.avatar.startsWith('/'))) {

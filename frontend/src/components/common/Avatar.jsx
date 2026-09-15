@@ -2,13 +2,8 @@ import React from 'react';
 
 // Curated list of friendly student emoji characters
 const STUDENT_EMOJI_MAP = {
-  yuki: '👩‍🎨',
-  emma: '👩‍🔬',
-  carlos: '🧑‍🌾',
-  sofia: '👩‍🎓',
-  liam: '🧑‍🚀',
-  hiroshi: '👨‍💻',
-  ruthvik: '🧑‍💻',
+  elena: '👩‍🎓',
+  kenji: '👨‍💻',
 };
 
 const DEFAULT_EMOJIS = ['🧑‍💻', '👩‍🎓', '👨‍🎨', '👩‍🔬', '🧑‍🌾', '👩‍💻', '👨‍🎓', '🧑‍🚀', '👩‍🎨', '👨‍🔬'];

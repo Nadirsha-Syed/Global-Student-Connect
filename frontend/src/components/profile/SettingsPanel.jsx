@@ -197,7 +197,7 @@ export function SettingsPanel() {
                   <input
                     type="text"
                     disabled
-                    value="ruthvik@example.com"
+                    value="elena.rostova@student.edu"
                     className="input-field"
                     style={{ backgroundColor: 'var(--bg-subtle)' }}
                   />

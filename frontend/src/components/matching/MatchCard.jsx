@@ -8,10 +8,17 @@ export function MatchCard({
   match,
   onViewProfile,
   onConnect,
+  onAccept,
+  onDecline,
+  connectionState = 'none', // 'none' | 'outgoing_pending' | 'incoming_pending' | 'accepted'
   isConnecting = false,
   hasConnected = false,
   compact = false,
 }) {
+  const isAccepted = hasConnected || connectionState === 'accepted';
+  const isOutgoing = connectionState === 'outgoing_pending';
+  const isIncoming = connectionState === 'incoming_pending';
+
   return (
     <Card
       hoverable
@@ -21,6 +28,7 @@ export function MatchCard({
         justifyContent: 'space-between',
         padding: compact ? '1.25rem' : '1.5rem',
         height: '100%',
+        border: isIncoming ? '2px solid #3b82f6' : '1px solid var(--border-subtle)',
       }}
     >
       <div>
@@ -40,7 +48,14 @@ export function MatchCard({
             flag={match.flag}
             isOnline={true}
           />
-          <MatchScoreBadge score={match.matchScore} />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+            <MatchScoreBadge score={match.matchScore} />
+            {isIncoming && (
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#2563eb', backgroundColor: '#dbeafe', padding: '2px 6px', borderRadius: '4px' }}>
+                Wants to connect!
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Student Name & Country */}
@@ -146,17 +161,49 @@ export function MatchCard({
         </Button>
 
         {!compact && (
-          <Button
-            variant={hasConnected ? 'secondary' : 'primary'}
-            size="sm"
-            onClick={() => onConnect?.(match)}
-            loading={isConnecting}
-            disabled={hasConnected}
-            icon={hasConnected ? UserCheck : Send}
-            style={{ width: '100%' }}
-          >
-            {hasConnected ? 'Connected' : 'Connect'}
-          </Button>
+          isIncoming ? (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => onAccept?.(match)}
+              loading={isConnecting}
+              icon={UserCheck}
+              style={{ width: '100%', backgroundColor: '#10b981', borderColor: '#10b981' }}
+            >
+              Accept
+            </Button>
+          ) : isOutgoing ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled
+              icon={UserCheck}
+              style={{ width: '100%' }}
+            >
+              Request Sent
+            </Button>
+          ) : isAccepted ? (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => window.location.href = '/video-call/test-room'}
+              icon={UserCheck}
+              style={{ width: '100%', backgroundColor: '#2563eb' }}
+            >
+              Call Room
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => onConnect?.(match)}
+              loading={isConnecting}
+              icon={Send}
+              style={{ width: '100%' }}
+            >
+              Connect
+            </Button>
+          )
         )}
       </div>
     </Card>

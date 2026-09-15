@@ -45,7 +45,7 @@ export function ProfileReviewStep({ profileData, onBack, onComplete, loading }) 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <h4 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-                {profileData.name || 'Ruthvik Reddy'}
+                {profileData.name || 'Elena Rostova'}
               </h4>
               <Badge variant="primary">
                 <ShieldCheck size={14} />

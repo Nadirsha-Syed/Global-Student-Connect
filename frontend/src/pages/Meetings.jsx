@@ -32,63 +32,30 @@ export function Meetings() {
   const upcomingMeeting = {
     id: 'meet-1',
     partner: {
-      id: '1',
-      name: 'Yuki Sato',
+      id: '6aa6fc60d506083a7a019631',
+      name: 'Kenji Takahashi',
       country: 'Japan',
       countryCode: 'JP',
       flag: '🇯🇵',
-      institution: 'Tokyo University',
-      avatar: '👩‍🎨',
-      languages: ['Japanese (Native)', 'English (Conversational)'],
-      interests: ['Technology', 'Anime', 'Music', 'Robotics'],
+      institution: 'Tokyo Institute of Technology',
+      avatar: '👨‍💻',
+      languages: ['Japanese (Native)', 'English (Fluent)'],
+      interests: ['Software Engineering', 'Robotics', 'Web Development', 'Cultural Exchange'],
     },
-    date: 'Tomorrow, Sep 11, 2026',
-    time: '4:00 PM – 4:45 PM (IST)',
-    localTimePartner: '7:30 PM – 8:15 PM (JST)',
-    topic: 'Student Life in Tokyo vs New Delhi: Campus clubs, favorite study spots, and tech projects',
+    date: 'Tomorrow, Sep 15, 2026',
+    time: '4:00 PM – 4:45 PM (CET)',
+    localTimePartner: '11:00 PM – 11:45 PM (JST)',
+    topic: 'Web Architecture, Distributed Robotics & Cross-Cultural Collaboration',
     status: 'Confirmed',
-    meetingLink: '/video-call',
+    meetingLink: '/video-call/test-room',
     icebreakers: [
-      'What is a typical weekday routine like at Tokyo University?',
-      'Which seasonal festivals or foods are popular right now in Japan?',
-      'What kind of robotics or coding projects is your campus club building?',
+      'What kind of robotics and web architecture projects are you currently developing?',
+      'How does student life in Tokyo compare to European universities?',
+      'What cross-border tech challenge should we brainstorm during this call?',
     ],
   };
 
-  const pastMeetings = [
-    {
-      id: 'past-1',
-      partner: {
-        id: '4',
-        name: 'Carlos Silva',
-        country: 'Brazil',
-        flag: '🇧🇷',
-        institution: 'University of São Paulo',
-        avatar: '🧑‍🌾',
-      },
-      date: 'September 7, 2026',
-      duration: '45 mins',
-      topic: 'Brazilian Coffee Culture & Environmental Tech in the Amazon',
-      reflectionStatus: 'Reflection Completed',
-      notesSnippet: 'Carlos gave amazing insights into how drone open-source projects help track reforestation in Brazil.',
-    },
-    {
-      id: 'past-2',
-      partner: {
-        id: '5',
-        name: 'Sofia Martinez',
-        country: 'Spain',
-        flag: '🇪🇸',
-        institution: 'Autonomous University of Madrid',
-        avatar: '👩‍🎓',
-      },
-      date: 'September 2, 2026',
-      duration: '40 mins',
-      topic: 'Madrid Architecture, Student Siestas & Modern Art Movements',
-      reflectionStatus: 'Reflection Completed',
-      notesSnippet: 'Learned about the history of Gaudí and modern architectural preservation across Spain.',
-    },
-  ];
+  const pastMeetings = [];
 
   const handleActionToast = (msg) => {
     setToastMessage(msg);
@@ -522,7 +489,7 @@ export function Meetings() {
         match={upcomingMeeting.partner}
         onConfirm={(rescheduleData) => {
           setRescheduleModalOpen(false);
-          handleActionToast(`Meeting rescheduled with Yuki for ${rescheduleData.date} at ${rescheduleData.time}!`);
+          handleActionToast(`Meeting rescheduled with Kenji for ${rescheduleData.date} at ${rescheduleData.time}!`);
         }}
       />
     </div>

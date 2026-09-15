@@ -49,7 +49,7 @@ export function BasicInfoStep({ data, onChange, onNext }) {
           label="Full Name"
           value={data.name || ''}
           onChange={(e) => onChange({ name: e.target.value })}
-          placeholder="e.g. Ruthvik Reddy"
+          placeholder="e.g. Elena Rostova"
           icon={User}
           required
         />

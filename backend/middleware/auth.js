@@ -105,5 +105,43 @@ export const requireAuth = async (req, res, next) => {
   });
 };
 
+export const optionalAuth = async (req, res, next) => {
+  try {
+    // 1. Check x-user-id header
+    const headerUserId = req.headers['x-user-id'];
+    if (headerUserId && /^[0-9a-fA-F]{24}$/.test(headerUserId)) {
+      req.userId = headerUserId.toString();
+      req.user = { id: headerUserId, _id: headerUserId };
+    }
+
+    // 2. Check x-user-email header
+    const headerUserEmail = req.headers['x-user-email'];
+    if (headerUserEmail && !req.userId) {
+      req.userEmail = headerUserEmail.toString().trim();
+    }
+
+    // 3. Check Authorization header
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : authHeader.trim();
+      if (/^[0-9a-fA-F]{24}$/.test(token)) {
+        req.userId = token;
+      } else {
+        const decoded = jwt.verify(
+          token,
+          process.env.JWT_SECRET || 'global_student_connect_jwt_secret_dev'
+        );
+        const resolvedId = decoded.id || decoded._id || decoded.userId || decoded.sub;
+        if (resolvedId) {
+          req.userId = resolvedId.toString();
+        }
+      }
+    }
+  } catch {
+    // Ignore invalid tokens in optional auth
+  }
+  next();
+};
+
 export const protect = requireAuth;
 export default requireAuth;

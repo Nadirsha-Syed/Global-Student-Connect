@@ -40,6 +40,7 @@ app.use('/api/auth', authRoutes);
 
 // Member 4: Matching & Scheduling Module Routes
 app.use('/api/match', matchingRoutes);
+app.use('/api/matches', matchingRoutes);
 app.use('/api/schedule', schedulingRoutes);
 
 // Member 5: AI Module Routes

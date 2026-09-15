@@ -53,31 +53,22 @@ export function Landing() {
 
   const studentSpotlights = [
     {
-      name: 'Yuki Sato',
+      name: 'Elena Rostova',
+      country: 'Germany',
+      flag: '🇩🇪',
+      uni: 'Technical University of Munich',
+      avatar: '👩‍🎓',
+      interests: ['Artificial Intelligence', 'Web Development', 'Cultural Exchange'],
+      quote: 'Global Student Connect paired me with Kenji in Tokyo. We bridged European web architecture with Japanese robotics and practice language exchange weekly!',
+    },
+    {
+      name: 'Kenji Takahashi',
       country: 'Japan',
       flag: '🇯🇵',
-      uni: 'Tokyo University',
-      avatar: '👩‍🎨',
-      interests: ['Anime & Manga', 'Robotics', 'Tea Culture'],
-      quote: 'Talking with students in India and Canada helped me gain confidence in conversational English while sharing Tokyo campus culture!',
-    },
-    {
-      name: 'Carlos Silva',
-      country: 'Brazil',
-      flag: '🇧🇷',
-      uni: 'University of São Paulo',
-      avatar: '🧑‍🌾',
-      interests: ['Environmental Tech', 'Samba', 'Football'],
-      quote: 'I made genuine friendships with engineering students across the ocean. We even collaborate on global climate hackathons now.',
-    },
-    {
-      name: 'Sofia Martinez',
-      country: 'Spain',
-      flag: '🇪🇸',
-      uni: 'Autonomous Univ. of Madrid',
-      avatar: '👩‍🎓',
-      interests: ['Architecture', 'Flamenco', 'Culinary Arts'],
-      quote: 'The guided topic cards made our first conversation so natural and warm. It feels like travelling without leaving your dorm room.',
+      uni: 'Tokyo Institute of Technology',
+      avatar: '👨‍💻',
+      interests: ['Software Engineering', 'Robotics', 'Cultural Exchange'],
+      quote: 'Talking with Elena helped me practice fluent technical English while sharing insights into Tokyo robotics circles and campus hackathons.',
     },
   ];
 
@@ -361,9 +352,9 @@ export function Landing() {
                 </div>
               </div>
 
-              {/* Character 1 (Ruthvik) and Speech Bubble */}
+              {/* Character 1 (Elena) and Speech Bubble */}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
-                <Avatar emoji="🧑‍💻" name="Ruthvik Reddy" flag="🇮🇳" size="lg" isOnline={true} />
+                <Avatar emoji="👩‍🎓" name="Elena Rostova" flag="🇩🇪" size="lg" isOnline={true} />
                 <div
                   style={{
                     backgroundColor: '#FFFFFF',
@@ -376,17 +367,17 @@ export function Landing() {
                   }}
                 >
                   <div style={{ fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.2rem', fontSize: '0.8rem' }}>
-                    Ruthvik Reddy <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>• India 🇮🇳</span>
+                    Elena Rostova <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>• Germany 🇩🇪</span>
                   </div>
                   <p style={{ margin: 0, color: 'var(--text-body)', lineHeight: 1.4 }}>
-                    "Namaste! Excited for our chat about campus tech clubs and sharing North vs South Indian food!"
+                    "Hallo Kenji! Excited for our exchange about web architecture, AI ethics, and student tech projects!"
                   </p>
                 </div>
               </div>
 
-              {/* Character 2 (Yuki) and Speech Bubble */}
+              {/* Character 2 (Kenji) and Speech Bubble */}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', alignSelf: 'flex-end', flexDirection: 'row-reverse', marginBottom: '1.5rem' }}>
-                <Avatar emoji="👩‍🎨" name="Yuki Sato" flag="🇯🇵" size="lg" isOnline={true} />
+                <Avatar emoji="👨‍💻" name="Kenji Takahashi" flag="🇯🇵" size="lg" isOnline={true} />
                 <div
                   style={{
                     backgroundColor: '#EFF6FF',
@@ -399,10 +390,10 @@ export function Landing() {
                   }}
                 >
                   <div style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: '0.2rem', fontSize: '0.8rem', textAlign: 'right' }}>
-                    Yuki Sato <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>• Japan 🇯🇵</span>
+                    Kenji Takahashi <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>• Japan 🇯🇵</span>
                   </div>
                   <p style={{ margin: 0, color: 'var(--text-main)', lineHeight: 1.4 }}>
-                    "Kon'nichiwa! Can't wait to share autumn festival traditions in Tokyo and talk about robotics clubs!"
+                    "Kon'nichiwa Elena! Looking forward to sharing Tokyo robotics research and collaborating across borders!"
                   </p>
                 </div>
               </div>

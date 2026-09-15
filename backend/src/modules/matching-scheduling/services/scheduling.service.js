@@ -405,3 +405,40 @@ export async function getMyReflections(userId) {
     .lean();
 }
 
+/**
+ * Submits a direct cultural reflection journal entry without requiring a pre-scheduled session.
+ */
+export async function createDirectReflection({
+  userId,
+  title,
+  partnerName,
+  partnerCountry,
+  duration,
+  tags,
+  learnings,
+  rating,
+  culturalExchangeNotes,
+}) {
+  const uid = new mongoose.Types.ObjectId(userId);
+  if (!learnings || !learnings.trim()) {
+    throw new Error('Key learnings or takeaways are required for reflection');
+  }
+
+  const reflection = await Reflection.create({
+    userId: uid,
+    title: title ? title.trim() : 'Cross-Cultural Dialogue',
+    partnerName: partnerName ? partnerName.trim() : 'Exchange Partner',
+    partnerCountry: partnerCountry ? partnerCountry.trim() : 'International',
+    duration: duration || '45 mins',
+    tags: Array.isArray(tags) ? tags : [],
+    learnings: learnings.trim(),
+    rating: Number(rating) || 5,
+    culturalExchangeNotes: culturalExchangeNotes ? culturalExchangeNotes.trim() : '',
+  });
+
+  return await Reflection.findById(reflection._id)
+    .populate('userId', 'name email country timezone')
+    .lean();
+}
+
+

@@ -4,8 +4,8 @@ import Input from '../common/Input';
 import Button from '../common/Button';
 
 export function LoginForm({ onSubmit, onToggleMode, loading, error }) {
-  const [email, setEmail] = useState('ruthvik@example.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('elena.rostova@student.edu');
+  const [password, setPassword] = useState('Password123!');
   const [rememberMe, setRememberMe] = useState(true);
   const [fieldErrors, setFieldErrors] = useState({});
 

@@ -81,7 +81,7 @@ export function SignUpForm({ onSubmit, onToggleMode, loading, error }) {
           label="Full Name"
           type="text"
           id="signup-name"
-          placeholder="e.g. Ruthvik Reddy"
+          placeholder="e.g. Elena Rostova"
           value={name}
           onChange={(e) => {
             setName(e.target.value);

@@ -2,14 +2,14 @@ import mongoose from 'mongoose';
 
 /**
  * Reflection Schema (Post-Call Reflection)
- * Stores peer feedback, key cultural insights, and learnings from a completed session.
+ * Stores peer feedback, key cultural insights, and learnings from a completed session or portfolio entry.
  */
 const reflectionSchema = new mongoose.Schema(
   {
     sessionId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Session',
-      required: [true, 'Session ID is required'],
+      required: false,
       index: true,
     },
     userId: {
@@ -17,6 +17,27 @@ const reflectionSchema = new mongoose.Schema(
       ref: 'User',
       required: [true, 'User ID is required'],
       index: true,
+    },
+    title: {
+      type: String,
+      trim: true,
+      default: 'Cross-Cultural Dialogue',
+    },
+    partnerName: {
+      type: String,
+      trim: true,
+    },
+    partnerCountry: {
+      type: String,
+      trim: true,
+    },
+    duration: {
+      type: String,
+      default: '45 mins',
+    },
+    tags: {
+      type: [String],
+      default: [],
     },
     learnings: {
       type: String,
@@ -72,9 +93,10 @@ reflectionSchema.virtual('feedback').get(function () {
   this.learnings = val;
 });
 
-// Compound uniqueness: A student cannot submit multiple reflections for the same session
-reflectionSchema.index({ sessionId: 1, userId: 1 }, { unique: true });
+// Compound uniqueness: A student cannot submit multiple reflections for the same session (when sessionId exists)
+reflectionSchema.index({ sessionId: 1, userId: 1 }, { unique: true, sparse: true });
 
 const Reflection = mongoose.model('Reflection', reflectionSchema);
 
 export default Reflection;
+

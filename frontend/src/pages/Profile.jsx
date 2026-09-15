@@ -29,18 +29,18 @@ export function Profile({ initialTab = 'overview' }) {
 
   // Local draft state for wizard setup
   const [draftProfile, setDraftProfile] = useState({
-    name: user?.name || 'Ruthvik Reddy',
-    country: user?.country || 'India',
-    countryCode: user?.countryCode || 'IN',
-    flag: user?.flag || '🇮🇳',
-    age: user?.age || 19,
-    educationLevel: user?.educationLevel || 'College / University',
-    institution: user?.institution || 'Delhi Technological University',
-    timezone: user?.timezone || 'Asia/Kolkata (IST +5:30)',
-    bio: user?.bio || 'I love technology, sports and learning about different cultures and making friends across borders!',
-    avatar: user?.avatar || '🧑‍💻',
-    interests: user?.interests || ['Technology', 'Science', 'Sports', 'Culture'],
-    languages: user?.languages || ['English', 'Hindi'],
+    name: user?.name || 'Elena Rostova',
+    country: user?.country || 'Germany',
+    countryCode: user?.countryCode || 'DE',
+    flag: user?.flag || '🇩🇪',
+    age: user?.age || 21,
+    educationLevel: user?.educationLevel || 'Undergraduate - 3rd Year',
+    institution: user?.institution || 'Technical University of Munich',
+    timezone: user?.timezone || 'Europe/Berlin (CET +1:00)',
+    bio: user?.bio || 'Computer science major specializing in artificial intelligence and web technologies. Passionate about cross-cultural academic collaboration, hackathons, and learning new languages.',
+    avatar: user?.avatar || '👩‍🎓',
+    interests: user?.interests || ['Artificial Intelligence', 'Web Development', 'System Architecture', 'Cultural Exchange'],
+    languages: user?.languages || ['English', 'German', 'French'],
   });
 
   const steps = [
